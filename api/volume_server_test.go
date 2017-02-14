@@ -12,6 +12,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -301,7 +303,15 @@ var _ = Describe("Volume Server", func() {
 				Expect(err).NotTo(HaveOccurred())
 				defer os.RemoveAll(unpackedDir)
 
-				cmd := exec.Command("tar", "-x", "-C", unpackedDir)
+				var unpackedDirForTar string
+				if runtime.GOOS == "windows" {
+					unpackedDirForTar = "/" + string(unpackedDir[0]) + string(unpackedDir[2:])
+					unpackedDirForTar = strings.Replace(unpackedDirForTar, "\\", "/", -1)
+				} else {
+					unpackedDirForTar = unpackedDir
+				}
+
+				cmd := exec.Command("tar", "-x", "-C", unpackedDirForTar)
 				cmd.Stdin = recorder.Body
 				err = cmd.Run()
 				Expect(err).NotTo(HaveOccurred())
@@ -361,7 +371,15 @@ var _ = Describe("Volume Server", func() {
 				Expect(err).NotTo(HaveOccurred())
 				defer os.RemoveAll(unpackedDir)
 
-				cmd := exec.Command("tar", "-x", "-C", unpackedDir)
+				var unpackedDirForTar string
+				if runtime.GOOS == "windows" {
+					unpackedDirForTar = "/" + string(unpackedDir[0]) + string(unpackedDir[2:])
+					unpackedDirForTar = strings.Replace(unpackedDirForTar, "\\", "/", -1)
+				} else {
+					unpackedDirForTar = unpackedDir
+				}
+
+				cmd := exec.Command("tar", "-x", "-C", unpackedDirForTar)
 				cmd.Stdin = recorder.Body
 				err = cmd.Run()
 				Expect(err).NotTo(HaveOccurred())

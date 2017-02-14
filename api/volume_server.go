@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/concourse/baggageclaim"
@@ -257,7 +259,15 @@ func (vs *VolumeServer) StreamIn(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tarCommand := exec.Command("tar", "-x", "-C", destinationPath)
+	var destinationPathForTar string
+	if runtime.GOOS == "windows" {
+		destinationPathForTar = "/" + string(destinationPath[0]) + string(destinationPath[2:])
+		destinationPathForTar = strings.Replace(destinationPathForTar, "\\", "/", -1)
+	} else {
+		destinationPathForTar = destinationPath
+	}
+
+	tarCommand := exec.Command("tar", "-x", "-C", destinationPathForTar)
 	tarCommand.Stdin = req.Body
 
 	err = tarCommand.Run()
