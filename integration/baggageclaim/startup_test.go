@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"os/exec"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -32,7 +33,11 @@ var _ = Describe("Startup", func() {
 		process, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
 
-		Eventually(process.Err).Should(gbytes.Say("the required flag `--volumes' was not specified"))
+		if runtime.GOOS == "windows" {
+			Eventually(process.Err).Should(gbytes.Say("the required flag `/volumes' was not specified"))
+		} else {
+			Eventually(process.Err).Should(gbytes.Say("the required flag `--volumes' was not specified"))
+		}
 		Eventually(process).Should(gexec.Exit(1))
 	})
 })
